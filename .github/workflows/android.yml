@@ -19,6 +19,23 @@ jobs:
           mkdir -p project
           unzip -o QuotexNativeAnalysis_CloudBuild_Ready.zip -d project
           cp -a project/. .
+      - name: Align Java and Kotlin JVM targets
+        run: |
+          cat >> app/build.gradle.kts <<'EOF'
+
+          android {
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+          }
+
+          kotlin {
+              compilerOptions {
+                  jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+              }
+          }
+          EOF
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
