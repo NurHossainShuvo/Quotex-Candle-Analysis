@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - "QuotexNativeAnalysis_CloudBuild_Ready.zip"
+      - "android-src/**"
       - ".github/workflows/android.yml"
 permissions:
   contents: read
@@ -19,6 +20,7 @@ jobs:
           mkdir -p project
           unzip -o QuotexNativeAnalysis_CloudBuild_Ready.zip -d project
           cp -a project/. .
+          cp android-src/CandleAnalysis.kt app/src/main/java/com/example/quotexanalysis/CandleAnalysis.kt
       - name: Align Java and Kotlin JVM targets
         run: |
           cat >> app/build.gradle.kts <<'EOF'
