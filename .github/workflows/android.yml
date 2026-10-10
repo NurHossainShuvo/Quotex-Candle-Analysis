@@ -1,12 +1,8 @@
-name: Build Android APK
+name: Build Quotex Candle Analysis APK
 on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-    paths:
-      - "QuotexNativeAnalysis_CloudBuild_Ready.zip"
-      - "android-src/**"
-      - ".github/workflows/android.yml"
 permissions:
   contents: read
 jobs:
@@ -15,29 +11,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Extract Android project from uploaded ZIP
-        run: |
-          mkdir -p project
-          unzip -o QuotexNativeAnalysis_CloudBuild_Ready.zip -d project
-          cp -a project/. .
-          cp android-src/CandleAnalysis.kt app/src/main/java/com/example/quotexanalysis/CandleAnalysis.kt
-      - name: Align Java and Kotlin JVM targets
-        run: |
-          cat >> app/build.gradle.kts <<'EOF'
-
-          android {
-              compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-          }
-
-          kotlin {
-              compilerOptions {
-                  jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-              }
-          }
-          EOF
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -48,11 +21,11 @@ jobs:
         with:
           gradle-version: "8.9"
       - name: Build debug APK
-        run: gradle :app:assembleDebug
+        run: gradle assembleDebug
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: QuotexAnalysis-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: Quotex-Candle-Analysis-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
