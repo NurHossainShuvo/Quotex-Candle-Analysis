@@ -13,14 +13,14 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
-    private static final int PICK_IMAGE = 401;
+    private static final int PICK_FILE = 401;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         webView = new WebView(this);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(false);
+        settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         webView.setWebViewClient(new WebViewClient());
@@ -28,10 +28,19 @@ public class MainActivity extends Activity {
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "চার্টের স্ক্রিনশট নির্বাচন করুন"), PICK_IMAGE);
+                String[] types = params.getAcceptTypes();
+                String mime = "*/*";
+                if (types != null && types.length > 0 && types[0] != null && !types[0].isEmpty()) mime = types[0];
+                intent.setType(mime);
+                try {
+                    startActivityForResult(intent, PICK_FILE);
+                } catch (Exception e) {
+                    fileCallback.onReceiveValue(null);
+                    fileCallback = null;
+                    return false;
+                }
                 return true;
             }
         });
@@ -41,7 +50,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE && fileCallback != null) {
+        if (requestCode == PICK_FILE && fileCallback != null) {
             Uri[] result = null;
             if (resultCode == RESULT_OK && data != null && data.getData() != null) result = new Uri[]{data.getData()};
             fileCallback.onReceiveValue(result);
